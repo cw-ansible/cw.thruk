@@ -1,0 +1,12 @@
+---
+
+
+thruk_apt_vendor: '{{ ansible_lsb.id | lower() }}'
+thruk_apt_release: '{{ ansible_lsb.codename }}'
+thruk_apt_mirror: 'http://labs.consol.de/repo/stable/{{ thruk_apt_vendor }}'
+
+thruk_apt_repository: 'deb {{ thruk_apt_mirror }} {{ thruk_apt_release }} main'
+
+thruk_apt_key_id: 'F8C1CA08A57B9ED7'
+thruk_apt_key_mirror: 'http://keyserver.ubuntu.com/pks'
+thruk_apt_key_url: '{{ thruk_apt_key_mirror }}/lookup?op=get&search=0x{{ thruk_apt_key_id }}'

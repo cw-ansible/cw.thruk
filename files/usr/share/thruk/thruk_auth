@@ -1,0 +1,16 @@
+--- thruk_auth.orig	2017-03-08 01:43:29.380962236 +0100
++++ thruk_auth		2017-03-08 01:50:21.328565556 +0100
+@@ -105,6 +105,13 @@
+             }
+         }
+
++        # If no authentication header is found and bypass cookie for special user-agent
++        # Force an auth request
++        if(!$extra->[1] && $extra->[2] =~ $direct_auth_regex) {
++            print STDERR "thruk_auth: script bypass cookie but no auth for $path" if $verbose;
++		return "/no-auth/$path\n";
++        }
++
+         # did we get a cookie
+         if($cookies eq '' or $cookies !~ $cookie_regex) {
+             print STDERR "thruk_auth: no cookie $path" if $verbose;

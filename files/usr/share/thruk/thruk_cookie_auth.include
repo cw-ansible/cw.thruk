@@ -1,0 +1,11 @@
+--- thruk_cookie_auth.include.orig	2017-03-08 01:43:40.120951908 +0100
++++ thruk_cookie_auth.include		2017-03-08 10:00:21.900470714 +0100
+@@ -24,6 +24,8 @@
+ RewriteRule ^/pass/(.*)$             /$1 [NS,PT,L,E=!REMOTE_USER]
+ RewriteRule ^/redirect/(.*)$         /$1 [NS,L,R=302]
+ RewriteRule ^/loginok/([^/]+)/(.*)$  /$2 [NS,PT,L,E=REMOTE_USER:$1]
++# Force special agent to auth themselves
++RewriteRule ^/no-auth/(.*)$         /$1 [L,E=auth:desks]
+
+ # finally exclude everything from basic auth, except the restricted.cgi
+ <LocationMatch ^/thruk(?!/cgi-bin/restricted.cgi)>

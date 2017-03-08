@@ -1,0 +1,88 @@
+---
+
+
+- name: Add Thruk apt-key
+  apt_key:
+    url: '{{ thruk_apt_key_url }}'
+
+- name: Add Thruk repository
+  apt_repository:
+    repo: '{{ thruk_apt_repository }}'
+
+- name: install Thruk packages
+  apt:
+    name: '{{ item }}'
+    install_recommends: no
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+    - thruk
+    - nagios-images
+    - patch
+    
+- name: deploy thruk sudo file
+  copy:
+    src: etc/sudoers.d/thruk
+    dest: /etc/sudoers.d/thruk
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Fix configuration file perms
+  file:
+    path: '{{ item.path }}'
+    owner: '{{ item.owner | default("www-data") }}'
+    group: '{{ item.group | default("www-data") }}'
+    mode: '{{ item.mode | default("0640") }}'
+    recurse: '{{ item.recurse | default(False) }}'
+  with_items:
+    - path: '/etc/thruk/cgi.cfg'
+    - path: '/etc/thruk/htpasswd'
+    - path: '/etc/thruk/thruk_local.conf'
+    - path: '/etc/thruk/thruk_local.d'
+      recurse: yes
+      mode: '0660'
+    - path: '/etc/thruk/thruk_local.d'
+      mode: '0750'
+
+- name: Deploy thruk secret
+  template:
+    src: var/lib/thruk/secret.key
+    dest: /var/lib/thruk/secret.key
+    owner: www-data
+    group: www-data
+    mode: '0640'
+  when: thruk_secret is defined
+
+- name: Fix image redirection in apache
+  lineinfile:
+    dest: /etc/apache2/conf-enabled/thruk.conf
+    line: '  Alias /thruk/icons/ /usr/share/nagios3/htdocs/images/'
+    insertbefore: 'Alias /thruk/documentation.html /usr/share/thruk/root/thruk/documentation.html'
+
+- name: Apply patches
+  patch:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest | default("/" + item.src) }}'
+    strip: "{{ item.strip|default('0') }}"
+    remote_src: False
+  with_items:
+    - src: 'usr/share/thruk/thruk_auth'
+    - src: 'usr/share/thruk/thruk_cookie_auth.include'
+    - src: 'etc/apache2/conf-available/thruk.conf'
+
+  
+    
+- name: Relocate thruk files
+  relocate:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    pre_cmd: '{{ item.pre_cmd | default() }}'
+    post_cmd: '{{ item.post_cmd | default() }}'
+    state: link
+    force: yes
+  when: thruk_relocate is defined
+  with_items: '{{ thruk_relocate }}'
+
+
+  

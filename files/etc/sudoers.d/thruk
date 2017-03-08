@@ -1,0 +1,3 @@
+# Allow thruk to restart nagios
+www-data ALL=(root) NOPASSWD:/etc/init.d/nagios3 restart
+www-data ALL=(nagios:nagios) NOPASSWD:/usr/sbin/nagios3 -v /etc/nagios3/nagios.cfg
